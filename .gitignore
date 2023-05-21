@@ -1,0 +1,4 @@
+.DS_Store
+*.pyc
+rovio_lib/rovio_connection.py
+checkpoints/*
