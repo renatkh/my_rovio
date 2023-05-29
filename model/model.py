@@ -19,7 +19,7 @@ class ImageCommandConverter(pl.LightningModule):
         self.command_weight = config["command_weight"]
 
         # init a pretrained resnet
-        backbone = models.resnet50(pretrained=True)
+        backbone = models.resnet50(pretrained=config["pretrained_weights"])
         num_filters = backbone.fc.in_features
         layers = list(backbone.children())[:-1]
         self.feature_extractor = nn.Sequential(*layers)
@@ -82,7 +82,7 @@ class ImageCommandConverter(pl.LightningModule):
         loss_command = F.cross_entropy(t_h[:, :10], t[:, :10])
         loss_speed = F.mse_loss(t_h[:, 10], t[:, 10])
         loss_unit = F.mse_loss(t_h[:, 11], t[:, 11])
-        loss = loss_command/self.command_weight + loss_speed + loss_unit
+        loss = loss_command*self.command_weight + loss_speed + loss_unit
         self.log("train_loss_command", loss_command)
         self.log("train_loss_speed", loss_speed)
         self.log("train_loss_unit", loss_unit)
@@ -100,7 +100,7 @@ class ImageCommandConverter(pl.LightningModule):
         loss_command = F.cross_entropy(t_h[:, :10], t[:, :10])
         loss_speed = F.mse_loss(t_h[:, 10], t[:, 10])
         loss_unit = F.mse_loss(t_h[:, 11], t[:, 11])
-        val_loss = loss_command/self.command_weight + loss_speed + loss_unit
+        val_loss = loss_command * self.command_weight + loss_speed + loss_unit
         self.log("val_loss", val_loss)
         self.log("val_loss_command", loss_command)
         self.log("val_loss_speed", loss_speed)

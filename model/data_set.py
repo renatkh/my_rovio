@@ -1,7 +1,10 @@
-from torch.utils.data import Dataset
 from os import listdir
 from os.path import isfile, join
+
 import numpy as np
+from torch.utils.data import Dataset
+
+REVERSE_COMMANDS = {0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4, 6: 9, 7: 8, 8: 7, 9: 6}
 
 
 class ImageDataSet(Dataset):
@@ -23,6 +26,7 @@ class ImageDataSet(Dataset):
                     self.im2 = np.moveaxis(data['im2'], -1, 0)
                     self.vector = data['vector']
         self.transform = transform
+        self.rc = np.random.RandomState(42)
 
     def __len__(self):
         return self.im1.shape[0]
@@ -33,7 +37,11 @@ class ImageDataSet(Dataset):
         vector = self.vector[idx]
         vector[1] = vector[1] / 10.  # speed normalization
         vector[2] = vector[2] / 4.  # rovio units value normalization
-        img = np.moveaxis(np.array([im1, im2, im2-im1]), 0, -1)
+        if self.rc.rand() < 0.5:
+            img = np.moveaxis(np.array([im1, im2, im2-im1]), 0, -1)
+        else:
+            img = np.moveaxis(np.array([im2, im1, im1-im2]), 0, -1)
+            vector[0] = REVERSE_COMMANDS[vector[0]]
         if self.transform:
             img = self.transform(img)
         return img, vector

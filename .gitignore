@@ -3,3 +3,4 @@
 rovio_lib/rovio_connection.py
 checkpoints/*
 sandbox.ipynb
+mlruns/*
